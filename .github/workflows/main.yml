@@ -22,7 +22,7 @@ jobs:
           gcloud compute instances start runner-instance-ga --zone=us-central1-a
   run-script:
     needs: start-vm
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: "read"
       id-token: "write"
