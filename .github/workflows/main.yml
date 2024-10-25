@@ -1,0 +1,52 @@
+name: complete python automation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  start-vm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.SERVICE_ACCOUNT_KEY }}'
+      - name: Start GCE VM
+        run: |
+          gcloud compute instances start runner-instance-ga --zone=us-central1-a
+  run-script:
+    needs: start-vm
+    runs-on: self-hosted
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run Python Script
+        run: |
+          ls
+          python test.py
+  stop-vm:
+    needs: run-script
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.SERVICE_ACCOUNT_KEY }}'
+      - name: Stop GCE VM
+        run: |
+          gcloud compute instances stop runner-instance-ga --zone=us-central1-a
